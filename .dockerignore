@@ -1,7 +1,7 @@
 .git
 .gitignore
 .idea
-.mvn/wrapper
+.mvn/wrapper/maven-wrapper.jar
 target
 uploads
 .env
