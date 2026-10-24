@@ -1,0 +1,57 @@
+name: Deploy to VPS
+
+on:
+  workflow_run:
+    workflows:
+      - Docker image
+    types:
+      - completed
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 644 "$HOME/.ssh/known_hosts"
+          printf '%s\n' "$SSH_KEY" > "$HOME/.ssh/deploy_key"
+          chmod 600 "$HOME/.ssh/deploy_key"
+
+      - name: Pull and restart application
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          ssh -i "$HOME/.ssh/deploy_key" "$SSH_USER@$SSH_HOST" \
+            "IMAGE_TAG='$IMAGE_TAG' bash -s" <<'REMOTE_SCRIPT'
+          set -eu
+          cd /opt/ramafest
+          set -a
+          . ./.env
+          set +a
+          printf '%s' "$GHCR_PULL_TOKEN" | docker login ghcr.io \
+            --username "$GHCR_PULL_USERNAME" --password-stdin
+          IMAGE_TAG="$IMAGE_TAG" docker compose pull app
+          IMAGE_TAG="$IMAGE_TAG" docker compose up -d --no-build
+          docker image prune -f
+          REMOTE_SCRIPT
+
+      - name: Check deployment health
+        env:
+          DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
+        run: |
+          curl --fail --silent --show-error --location \
+            --retry 12 --retry-delay 5 --retry-connrefused \
+            "$DEPLOY_URL/actuator/health" | grep -q '"status":"UP"'

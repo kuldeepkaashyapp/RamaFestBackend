@@ -1,0 +1,9 @@
+.git
+.gitignore
+.idea
+.mvn/wrapper
+target
+uploads
+.env
+*.log
+README-DEPLOY.md
