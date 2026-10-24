@@ -21,7 +21,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "${PORT:-8080}:8080"
+      - "${PORT:-8000}:8000"
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
       DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
@@ -30,7 +30,7 @@ services:
       FRONTEND_URL: ${FRONTEND_URL}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
       API_URL: ${API_URL}
-      PORT: 8080
+      PORT: 8000
       JPA_DDL_AUTO: ${JPA_DDL_AUTO:-validate}
       UPLOAD_DIR: ${UPLOAD_DIR:-uploads}
       APP_AUDIT_TRUSTED_PROXIES: ${APP_AUDIT_TRUSTED_PROXIES:-}

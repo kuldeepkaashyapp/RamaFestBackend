@@ -8,7 +8,7 @@ RUN chmod +x mvnw
 RUN ./mvnw -B dependency:go-offline
 
 COPY src src
-RUN ./mvnw -B clean package -DskipTests
+RUN ./mvnw -B -DskipTests clean package
 
 FROM eclipse-temurin:17-jre
 
@@ -18,5 +18,6 @@ COPY --from=build /workspace/target/ramafest.jar /app/ramafest.jar
 RUN mkdir -p /app/uploads && chown -R ramafest:ramafest /app
 
 USER ramafest
-EXPOSE 8080
+EXPOSE 8000
+ENV SPRING_PROFILES_ACTIVE=prod
 ENTRYPOINT ["java", "-jar", "/app/ramafest.jar"]

@@ -31,7 +31,7 @@ docker compose --env-file .env up -d
 docker compose ps
 ```
 
-The application is published on the configured host `PORT` (default `8080`).
+The application is published on the configured host `PORT` (default `8000`).
 The database data and application uploads are stored in named Docker volumes.
 
 ## Build and run the JAR
@@ -44,7 +44,7 @@ java -jar .\target\ramafest.jar --spring.profiles.active=prod
 ## Check health
 
 ```powershell
-Invoke-WebRequest http://localhost:8080/actuator/health
+Invoke-WebRequest http://localhost:8000/actuator/health
 ```
 
 A healthy deployment returns HTTP 200 with a JSON status of `UP`. Put the
@@ -111,7 +111,7 @@ Do not expose PostgreSQL or the application port directly to the internet.
 
 Install Nginx and Certbot with the Nginx plugin from your distribution
 packages. Point DNS for the deployment hostname at the VPS, configure Nginx
-to proxy to `http://127.0.0.1:8080`, and request a certificate:
+to proxy to `http://127.0.0.1:8000`, and request a certificate:
 
 ```bash
 sudo apt-get update
